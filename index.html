@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📝 امتحان القانون العام والمميز (2-6)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Cairo', sans-serif; }
+        body.en-mode { font-family: 'Inter', sans-serif; }
+        .correct { background-color: #dcfce7 !important; border-color: #16a34a !important; }
+        .incorrect { background-color: #fee2e2 !important; border-color: #dc2626 !important; }
+        .formula { font-family: 'Times New Roman', serif; direction: ltr; display: inline-block; font-style: italic; }
+        .timer-warning { color: #dc2626 !important; animation: pulse 1s infinite; }
+        @keyframes pulse { 50% { opacity: 0.7; } }
+        @media print { .no-print { display: none !important; } body { background: white; color: black; } .answer-box { display: block !important; color: #166534 !important; } #results-panel { display: block !important; box-shadow: none; border: 2px solid #000; } }
+        .success-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-weight: bold; font-size: 0.875rem; }
+        .grade-excellent { background: #dcfce7; color: #166534; }
+        .grade-good { background: #fef3c7; color: #92400e; }
+        .grade-pass { background: #dbeafe; color: #1e40af; }
+        .grade-fail { background: #fee2e2; color: #991b1b; }
+        .lang-switch { position: fixed; top: 16px; left: 16px; z-index: 100; background: white; padding: 6px; border-radius: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.15); display: flex; gap: 4px; border: 2px solid #8b5cf6; }
+        [dir="ltr"] .lang-switch { left: auto; right: 16px; }
+        .lang-btn { padding: 6px 14px; border-radius: 20px; cursor: pointer; font-weight: bold; transition: all 0.3s; border: none; font-size: 0.875rem; background: transparent; color: #6b7280; }
+        .lang-btn.active { background: #8b5cf6; color: white; box-shadow: 0 2px 6px rgba(139,92,246,0.4); }
+        .lang-btn:hover:not(.active) { background: #f5f3ff; color: #8b5cf6; }
+        .shuffle-badge { display: inline-block; background: linear-gradient(135deg, #f59e0b, #ef4444); color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; margin-right: 8px; animation: pulse 2s infinite; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 p-4 md:p-8 min-h-screen">
+    <div class="lang-switch no-print">
+        <button type="button" class="lang-btn active" onclick="setLanguage('ar')" id="btn-ar">عربي</button>
+        <button type="button" class="lang-btn" onclick="setLanguage('en')" id="btn-en">EN</button>
+    </div>
+    <div id="timer-container" class="max-w-4xl mx-auto mb-4 text-center no-print">
+        <div class="bg-white p-4 rounded-xl shadow-md inline-block border-2 border-purple-100">
+            <span class="text-gray-600 ml-2" data-ar="⏱️ الوقت المتبقي:" data-en="⏱️ Time Remaining:">⏱️ الوقت المتبقي:</span>
+            <span id="timer" class="text-2xl font-bold text-purple-600 font-mono">60:00</span>
+            <span class="shuffle-badge" data-ar="🔀 أسئلة عشوائية" data-en="🔀 Random Questions">🔀 أسئلة عشوائية</span>
+        </div>
+    </div>
+    <div class="max-w-4xl mx-auto mb-6 flex flex-wrap gap-3 justify-center no-print">
+        <button type="button" onclick="toggleAnswers()" class="bg-purple-600 hover:bg-purple-700 text-white px-5 py-2 rounded-lg font-medium transition shadow cursor-pointer" data-ar="👁️ إظهار / إخفاء الإجابات" data-en="👁️ Show / Hide Answers">👁️ إظهار / إخفاء الإجابات</button>
+        <button type="button" onclick="window.print()" class="bg-gray-800 hover:bg-gray-900 text-white px-5 py-2 rounded-lg font-medium transition shadow cursor-pointer" data-ar="🖨️ طباعة / PDF" data-en="🖨️ Print / PDF">🖨️ طباعة / PDF</button>
+        <button type="button" onclick="reshuffleExam()" class="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-5 py-2 rounded-lg font-medium transition shadow cursor-pointer" data-ar="🔀 إعادة خلط الأسئلة" data-en="🔀 Reshuffle Questions">🔀 إعادة خلط الأسئلة</button>
+    </div>
+    <header class="max-w-4xl mx-auto bg-white p-6 rounded-xl shadow-md mb-8 border-r-4 border-purple-600">
+        <div class="text-center">
+            <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2" data-ar="📝 امتحان القانون العام والمميز (2-6)" data-en="📝 The Quadratic Formula and Discriminant Exam (2-6)">📝 امتحان القانون العام والمميز (2-6)</h1>
+            <h2 class="text-lg text-purple-600 font-semibold" data-ar="The Quadratic Formula and the Discriminant" data-en="The Quadratic Formula and the Discriminant">The Quadratic Formula and the Discriminant</h2>
+            <p class="text-sm text-gray-600 mt-2" data-ar="امتحان شامل للقانون العام، المميز، تحديد نوع الجذور، اختيار الطريقة الأنسب، والتطبيقات الحياتية" data-en="Comprehensive exam on quadratic formula, discriminant, determining roots type, choosing the best method, and real-life applications">امتحان شامل للقانون العام، المميز، تحديد نوع الجذور، اختيار الطريقة الأنسب، والتطبيقات الحياتية</p>
+            <p class="text-xs text-purple-600 mt-2 font-semibold" data-ar="⚠️ ملاحظة: يتم خلط ترتيب الأسئلة والخيارات تلقائياً مع كل تحديث للصفحة" data-en="⚠️ Note: Questions and options are randomly shuffled on every page refresh">⚠️ ملاحظة: يتم خلط ترتيب الأسئلة والخيارات تلقائياً مع كل تحديث للصفحة</p>
+        </div>
+        <div class="mt-4 flex flex-wrap justify-center gap-4 text-sm text-gray-600">
+            <span><span data-ar="📅 التاريخ:" data-en="📅 Date:">📅 التاريخ:</span> <input type="date" id="examDate" class="border-b border-gray-400 bg-transparent w-32 text-center"></span>
+            <span><span data-ar="👤 الاسم:" data-en="👤 Name:">👤 الاسم:</span> <input type="text" id="studentName" class="border-b border-gray-400 bg-transparent w-32 text-center" placeholder="Enter name" required></span>
+            <span><span data-ar="🏫 الشعبة:" data-en="🏫 Class:">🏫 الشعبة:</span> <input type="text" id="studentClass" class="border-b border-gray-400 bg-transparent w-28 text-center" placeholder="Class"></span>
+            <span><span data-ar="⏱️ المدة: 60 دقيقة" data-en="⏱️ Duration: 60 min">⏱️ المدة: 60 دقيقة</span></span>
+            <span><span data-ar="📊 المجموع: 50 درجة" data-en="📊 Total: 50 pts">📊 المجموع: 50 درجة</span></span>
+        </div>
+    </header>
+    <main class="max-w-4xl mx-auto space-y-8" id="exam-content"></main>
+    <div class="text-center no-print pb-8 mt-8">
+        <button type="button" onclick="gradeExam()" class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white text-lg px-10 py-4 rounded-xl font-bold shadow-xl transition transform hover:scale-105 cursor-pointer" data-ar="📝 تسليم وتصحيح الامتحان" data-en="📝 Submit & Grade Exam">📝 تسليم وتصحيح الامتحان</button>
+    </div>
+    <div id="results-panel" class="max-w-4xl mx-auto mt-8 bg-white p-8 rounded-2xl shadow-2xl border-t-4 border-emerald-500 hidden no-print">
+        <h2 class="text-3xl font-bold text-gray-900 mb-6 text-center" data-ar="📊 نتائج الامتحان" data-en="📊 Exam Results">📊 نتائج الامتحان</h2>
+        <div class="grid md:grid-cols-3 gap-4 mb-6">
+            <div class="bg-blue-50 p-4 rounded-xl text-center"><p data-ar="اسم الطالب" data-en="Student Name">اسم الطالب</p><p id="res-name" class="font-bold text-xl text-purple-700">-</p></div>
+            <div class="bg-purple-50 p-4 rounded-xl text-center"><p data-ar="التاريخ" data-en="Date">التاريخ</p><p id="res-date" class="font-bold text-xl text-purple-700">-</p></div>
+            <div class="bg-emerald-50 p-4 rounded-xl text-center"><p data-ar="المجموع" data-en="Score">المجموع</p><p id="res-total" class="font-bold text-3xl text-emerald-600">0 / 50</p></div>
+        </div>
+        <div class="text-center mb-6">
+            <span id="success-badge" class="success-badge grade-excellent">-</span>
+            <p id="success-percent" class="text-4xl font-bold text-emerald-600 mt-2">100%</p>
+            <p class="text-sm text-gray-500" data-ar="نسبة النجاح" data-en="Success Rate">نسبة النجاح</p>
+        </div>
+        <div class="bg-gray-50 p-6 rounded-xl mb-6">
+            <h3 class="font-bold text-lg mb-4 text-gray-800" data-ar="📈 تفصيل الأداء حسب القسم:" data-en="📈 Performance Breakdown:">📈 تفصيل الأداء حسب القسم:</h3>
+            <div class="space-y-3">
+                <div class="flex justify-between items-center"><span class="text-gray-700" data-ar="القانون العام - حل المعادلات" data-en="Quadratic Formula - Solving Equations">القانون العام - حل المعادلات</span><span id="sec1-score" class="font-bold text-purple-600">0/10</span></div>
+                <div class="flex justify-between items-center"><span class="text-gray-700" data-ar="المميز وتحديد نوع الجذور" data-en="Discriminant and Root Types">المميز وتحديد نوع الجذور</span><span id="sec2-score" class="font-bold text-purple-600">0/10</span></div>
+                <div class="flex justify-between items-center"><span class="text-gray-700" data-ar="اختيار الطريقة الأنسب للحل" data-en="Choosing the Best Method">اختيار الطريقة الأنسب للحل</span><span id="sec3-score" class="font-bold text-purple-600">0/10</span></div>
+                <div class="flex justify-between items-center"><span class="text-gray-700" data-ar="التطبيقات الحياتية - حركة المقذوفات" data-en="Applications - Projectile Motion">التطبيقات الحياتية - حركة المقذوفات</span><span id="sec4-score" class="font-bold text-purple-600">0/10</span></div>
+                <div class="flex justify-between items-center"><span class="text-gray-700" data-ar="مسائل متقدمة ومختلطة" data-en="Advanced and Mixed Problems">مسائل متقدمة ومختلطة</span><span id="sec5-score" class="font-bold text-purple-600">0/10</span></div>
+            </div>
+        </div>
+        <div class="text-center mb-6">
+            <button type="button" id="sendEmailBtn" onclick="sendResultsToEmail()" class="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white text-lg px-8 py-3 rounded-xl font-bold shadow-xl transition transform hover:scale-105 cursor-pointer" data-ar="📧 إرسال النتائج للمعلم" data-en="📧 Send Results to Teacher">📧 إرسال النتائج للمعلم</button>
+            <p id="emailStatus" class="text-sm mt-2 text-center font-medium"></p>
+        </div>
+        <div class="flex gap-3 justify-center">
+            <button type="button" onclick="window.print()" class="bg-gray-700 text-white px-6 py-3 rounded-lg font-semibold" data-ar="🖨️ طباعة النتائج" data-en="🖨️ Print Results">🖨️ طباعة النتائج</button>
+        </div>
+    </div>
+    <footer class="max-w-4xl mx-auto mt-10 mb-8 text-center text-gray-500 text-sm no-print">
+        © <span data-ar="The Quadratic Formula and Discriminant (2-6)" data-en="The Quadratic Formula and Discriminant (2-6)">The Quadratic Formula and Discriminant (2-6)</span> | Mr. Mohammed Hesham
+    </footer>
+
+<script>
+const PUBLIC_KEY = "Rb3Lq8tXaFmc5YHUH";
+const SERVICE_ID = "service_w15m64i";
+const TEMPLATE_ID = "template_5b0u2tq";
+const TARGET_EMAIL = "mohammedhesham872@gmail.com";
+emailjs.init(PUBLIC_KEY);
+
+const originalExamData = {
+    sections: [
+        {
+            id: 'sec1',
+            title: { ar: '🔹 الجزء الأول: القانون العام - حل المعادلات', en: '🔹 Part 1: Quadratic Formula - Solving Equations' },
+            questions: [
+                { q: { ar: 'ما صيغة القانون العام لحل المعادلة ax² + bx + c = 0؟', en: 'What is the quadratic formula for ax² + bx + c = 0?' }, options: [ { ar: 'x = (-b ± √(b²-4ac)) / 2a', en: 'x = (-b ± √(b²-4ac)) / 2a' }, { ar: 'x = (b ± √(b²-4ac)) / 2a', en: 'x = (b ± √(b²-4ac)) / 2a' }, { ar: 'x = (-b ± √(b²+4ac)) / 2a', en: 'x = (-b ± √(b²+4ac)) / 2a' }, { ar: 'x = (-b ± √(b²-4ac)) / a', en: 'x = (-b ± √(b²-4ac)) / a' } ], correct: 0, answer: { ar: 'الصيغة الصحيحة هي x = (-b ± √(b²-4ac)) / 2a', en: 'The correct formula is x = (-b ± √(b²-4ac)) / 2a' } },
+                { q: { ar: 'حل المعادلة: x² + 10x + 25 = 0', en: 'Solve: x² + 10x + 25 = 0' }, options: [ { ar: 'x = -5 (جذر مكرر)', en: 'x = -5 (repeated root)' }, { ar: 'x = 5', en: 'x = 5' }, { ar: 'x = -5 و x = 5', en: 'x = -5 and x = 5' }, { ar: 'لا يوجد حل', en: 'No solution' } ], correct: 0, answer: { ar: 'a=1, b=10, c=25 → المميز = 100-100 = 0 → x = -10/2 = -5', en: 'a=1, b=10, c=25 → discriminant = 0 → x = -5' } },
+                { q: { ar: 'حل المعادلة: 2x² + 5x - 3 = 0', en: 'Solve: 2x² + 5x - 3 = 0' }, options: [ { ar: 'x = 1/2 أو x = -3', en: 'x = 1/2 or x = -3' }, { ar: 'x = -1/2 أو x = 3', en: 'x = -1/2 or x = 3' }, { ar: 'x = 3 أو x = -1/2', en: 'x = 3 or x = -1/2' }, { ar: 'x = 1/2 أو x = 3', en: 'x = 1/2 or x = 3' } ], correct: 0, answer: { ar: 'a=2, b=5, c=-3 → المميز = 25+24 = 49 → x = (-5±7)/4 → x = 1/2 أو -3', en: 'discriminant = 49 → x = (-5±7)/4 → x = 1/2 or -3' } },
+                { q: { ar: 'حل المعادلة: x² - 6x + 9 = 0', en: 'Solve: x² - 6x + 9 = 0' }, options: [ { ar: 'x = 3 (جذر مكرر)', en: 'x = 3 (repeated root)' }, { ar: 'x = -3', en: 'x = -3' }, { ar: 'x = 3 و x = -3', en: 'x = 3 and x = -3' }, { ar: 'لا يوجد حل', en: 'No solution' } ], correct: 0, answer: { ar: 'المميز = 36-36 = 0 → x = 6/2 = 3', en: 'discriminant = 0 → x = 3' } },
+                { q: { ar: 'حل المعادلة: 3x² - 4x + 2 = 0', en: 'Solve: 3x² - 4x + 2 = 0' }, options: [ { ar: 'لا توجد جذور حقيقية (جذران مركبان)', en: 'No real roots (complex roots)' }, { ar: 'x = 2', en: 'x = 2' }, { ar: 'x = -2', en: 'x = -2' }, { ar: 'x = 2/3', en: 'x = 2/3' } ], correct: 0, answer: { ar: 'المميز = 16-24 = -8 < 0 → لا توجد جذور حقيقية', en: 'discriminant = -8 < 0 → no real roots' } },
+                { q: { ar: 'حل المعادلة: x² + 4x - 5 = 0', en: 'Solve: x² + 4x - 5 = 0' }, options: [ { ar: 'x = 1 أو x = -5', en: 'x = 1 or x = -5' }, { ar: 'x = -1 أو x = 5', en: 'x = -1 or x = 5' }, { ar: 'x = 5 أو x = -1', en: 'x = 5 or x = -1' }, { ar: 'x = 1 أو x = 5', en: 'x = 1 or x = 5' } ], correct: 0, answer: { ar: 'a=1, b=4, c=-5 → المميز = 16+20 = 36 → x = (-4±6)/2 → x = 1 أو -5', en: 'discriminant = 36 → x = (-4±6)/2 → x = 1 or -5' } },
+                { q: { ar: 'حل المعادلة: 2x² - 7x + 3 = 0', en: 'Solve: 2x² - 7x + 3 = 0' }, options: [ { ar: 'x = 3 أو x = 1/2', en: 'x = 3 or x = 1/2' }, { ar: 'x = -3 أو x = -1/2', en: 'x = -3 or x = -1/2' }, { ar: 'x = 3/2', en: 'x = 3/2' }, { ar: 'لا يوجد حل', en: 'No solution' } ], correct: 0, answer: { ar: 'المميز = 49-24 = 25 → x = (7±5)/4 → x = 3 أو 1/2', en: 'discriminant = 25 → x = (7±5)/4 → x = 3 or 1/2' } },
+                { q: { ar: 'حل المعادلة: x² + 2x + 5 = 0', en: 'Solve: x² + 2x + 5 = 0' }, options: [ { ar: 'لا توجد جذور حقيقية', en: 'No real roots' }, { ar: 'x = -1', en: 'x = -1' }, { ar: 'x = 1', en: 'x = 1' }, { ar: 'x = -5', en: 'x = -5' } ], correct: 0, answer: { ar: 'المميز = 4-20 = -16 < 0 → لا توجد جذور حقيقية', en: 'discriminant = -16 < 0 → no real roots' } },
+                { q: { ar: 'حل المعادلة: 4x² - 12x + 9 = 0', en: 'Solve: 4x² - 12x + 9 = 0' }, options: [ { ar: 'x = 3/2 (جذر مكرر)', en: 'x = 3/2 (repeated root)' }, { ar: 'x = -3/2', en: 'x = -3/2' }, { ar: 'x = 3 أو x = -3', en: 'x = 3 or x = -3' }, { ar: 'لا يوجد حل', en: 'No solution' } ], correct: 0, answer: { ar: 'المميز = 144-144 = 0 → x = 12/8 = 3/2', en: 'discriminant = 0 → x = 3/2' } },
+                { q: { ar: 'حل المعادلة: x² - 5x + 6 = 0', en: 'Solve: x² - 5x + 6 = 0' }, options: [ { ar: 'x = 2 أو x = 3', en: 'x = 2 or x = 3' }, { ar: 'x = -2 أو x = -3', en: 'x = -2 or x = -3' }, { ar: 'x = 6', en: 'x = 6' }, { ar: 'x = 1', en: 'x = 1' } ], correct: 0, answer: { ar: 'المميز = 25-24 = 1 → x = (5±1)/2 → x = 3 أو 2', en: 'discriminant = 1 → x = (5±1)/2 → x = 3 or 2' } }
+            ]
+        },
+        {
+            id: 'sec2',
+            title: { ar: '🔹 الجزء الثاني: المميز وتحديد نوع الجذور', en: '🔹 Part 2: Discriminant and Root Types' },
+            questions: [
+                { q: { ar: 'ما المميز (Discriminant) في القانون العام؟', en: 'What is the discriminant in the quadratic formula?' }, options: [ { ar: 'b² - 4ac', en: 'b² - 4ac' }, { ar: 'b² + 4ac', en: 'b² + 4ac' }, { ar: '4ac - b²', en: '4ac - b²' }, { ar: '2a - b', en: '2a - b' } ], correct: 0, answer: { ar: 'المميز هو b² - 4ac', en: 'The discriminant is b² - 4ac' } },
+                { q: { ar: 'إذا كان المميز موجباً (b²-4ac > 0)، فالمعادلة لها:', en: 'If discriminant > 0, the equation has:' }, options: [ { ar: 'جذران حقيقيان مختلفان', en: 'Two different real roots' }, { ar: 'جذر حقيقي واحد', en: 'One real root' }, { ar: 'لا توجد جذور حقيقية', en: 'No real roots' }, { ar: 'جذران تخيليان فقط', en: 'Only imaginary roots' } ], correct: 0, answer: { ar: 'المميز الموجب يعني جذرين حقيقيين مختلفين', en: 'Positive discriminant means two different real roots' } },
+                { q: { ar: 'إذا كان المميز صفراً (b²-4ac = 0)، فالمعادلة لها:', en: 'If discriminant = 0, the equation has:' }, options: [ { ar: 'جذر حقيقي واحد (مكرر)', en: 'One real root (repeated)' }, { ar: 'جذران مختلفان', en: 'Two different roots' }, { ar: 'لا توجد جذور', en: 'No roots' }, { ar: 'جذران تخيليان', en: 'Two imaginary roots' } ], correct: 0, answer: { ar: 'المميز = 0 يعني جذراً واحداً مكرراً', en: 'Discriminant = 0 means one repeated root' } },
+                { q: { ar: 'إذا كان المميز سالباً (b²-4ac < 0)، فالمعادلة لها:', en: 'If discriminant < 0, the equation has:' }, options: [ { ar: 'لا توجد جذور حقيقية (جذران مركبان)', en: 'No real roots (complex roots)' }, { ar: 'جذران حقيقيان', en: 'Two real roots' }, { ar: 'جذر واحد', en: 'One root' }, { ar: 'عدد لا نهائي من الجذور', en: 'Infinitely many roots' } ], correct: 0, answer: { ar: 'المميز السالب يعني عدم وجود جذور حقيقية', en: 'Negative discriminant means no real roots' } },
+                { q: { ar: 'ما المميز للمعادلة: x² + 6x + 9 = 0؟', en: 'What is the discriminant of x² + 6x + 9 = 0?' }, options: [ { ar: '0', en: '0' }, { ar: '36', en: '36' }, { ar: '-36', en: '-36' }, { ar: '9', en: '9' } ], correct: 0, answer: { ar: 'a=1, b=6, c=9 → المميز = 36-36 = 0', en: 'discriminant = 36-36 = 0' } },
+                { q: { ar: 'ما المميز للمعادلة: 2x² - 3x + 5 = 0؟', en: 'What is the discriminant of 2x² - 3x + 5 = 0?' }, options: [ { ar: '-31', en: '-31' }, { ar: '31', en: '31' }, { ar: '49', en: '49' }, { ar: '-49', en: '-49' } ], correct: 0, answer: { ar: 'a=2, b=-3, c=5 → المميز = 9-40 = -31', en: 'discriminant = 9-40 = -31' } },
+                { q: { ar: 'ما المميز للمعادلة: x² - 4x + 1 = 0؟', en: 'What is the discriminant of x² - 4x + 1 = 0?' }, options: [ { ar: '12', en: '12' }, { ar: '-12', en: '-12' }, { ar: '16', en: '16' }, { ar: '0', en: '0' } ], correct: 0, answer: { ar: 'a=1, b=-4, c=1 → المميز = 16-4 = 12', en: 'discriminant = 16-4 = 12' } },
+                { q: { ar: 'ما المميز للمعادلة: 3x² + 2x + 1 = 0؟', en: 'What is the discriminant of 3x² + 2x + 1 = 0?' }, options: [ { ar: '-8', en: '-8' }, { ar: '8', en: '8' }, { ar: '16', en: '16' }, { ar: '4', en: '4' } ], correct: 0, answer: { ar: 'a=3, b=2, c=1 → المميز = 4-12 = -8', en: 'discriminant = 4-12 = -8' } },
+                { q: { ar: 'ما المميز للمعادلة: x² - 8x + 16 = 0؟', en: 'What is the discriminant of x² - 8x + 16 = 0?' }, options: [ { ar: '0', en: '0' }, { ar: '64', en: '64' }, { ar: '-64', en: '-64' }, { ar: '16', en: '16' } ], correct: 0, answer: { ar: 'a=1, b=-8, c=16 → المميز = 64-64 = 0', en: 'discriminant = 64-64 = 0' } },
+                { q: { ar: 'ما المميز للمعادلة: 2x² + 5x - 3 = 0؟', en: 'What is the discriminant of 2x² + 5x - 3 = 0?' }, options: [ { ar: '49', en: '49' }, { ar: '-49', en: '-49' }, { ar: '25', en: '25' }, { ar: '1', en: '1' } ], correct: 0, answer: { ar: 'a=2, b=5, c=-3 → المميز = 25+24 = 49', en: 'discriminant = 25+24 = 49' } }
+            ]
+        },
+        {
+            id: 'sec3',
+            title: { ar: '🔹 الجزء الثالث: اختيار الطريقة الأنسب للحل', en: '🔹 Part 3: Choosing the Best Method' },
+            questions: [
+                { q: { ar: 'متى يُفضل استخدام التحليل إلى عوامل (Factoring)؟', en: 'When is factoring preferred?' }, options: [ { ar: 'عندما يمكن تحليل المعادلة بسهولة (معاملات صحيحة صغيرة)', en: 'When the equation can be easily factored (small integer coefficients)' }, { ar: 'عندما يكون b = 0', en: 'When b = 0' }, { ar: 'عندما يكون a = 1 و b عدداً زوجياً', en: 'When a = 1 and b is even' }, { ar: 'عندما تكون المعاملات كسوراً', en: 'When coefficients are fractions' } ], correct: 0, answer: { ar: 'التحليل يُفضل عندما تكون المعاملات صحيحة صغيرة ويمكن التحليل بسهولة', en: 'Factoring is preferred when coefficients are small integers and factoring is easy' } },
+                { q: { ar: 'متى تُستخدم خاصية الجذر التربيعي (Square Root Property)؟', en: 'When is the square root property used?' }, options: [ { ar: 'عندما يكون b = 0 (مثل ax² + c = 0)', en: 'When b = 0 (like ax² + c = 0)' }, { ar: 'عندما تكون المعادلة ثلاثية الحدود', en: 'When the equation is trinomial' }, { ar: 'عندما يكون a = 1 و b عدداً زوجياً', en: 'When a = 1 and b is even' }, { ar: 'عندما تفشل الطرق الأخرى', en: 'When other methods fail' } ], correct: 0, answer: { ar: 'خاصية الجذر التربيعي تُستخدم عندما b = 0', en: 'Square root property is used when b = 0' } },
+                { q: { ar: 'متى يُستخدم إكمال المربع (Completing the Square)؟', en: 'When is completing the square used?' }, options: [ { ar: 'عندما يكون a = 1 و b عدداً زوجياً', en: 'When a = 1 and b is even' }, { ar: 'عندما يكون b = 0', en: 'When b = 0' }, { ar: 'عندما يمكن التحليل بسهولة', en: 'When factoring is easy' }, { ar: 'عندما تكون المعاملات كسوراً', en: 'When coefficients are fractions' } ], correct: 0, answer: { ar: 'إكمال المربع يُستخدم عندما a = 1 و b زوجي', en: 'Completing the square is used when a = 1 and b is even' } },
+                { q: { ar: 'متى يُستخدم القانون العام (Quadratic Formula)؟', en: 'When is the quadratic formula used?' }, options: [ { ar: 'عندما تفشل الطرق الأخرى أو المعاملات معقدة', en: 'When other methods fail or coefficients are complex' }, { ar: 'عندما يمكن التحليل بسهولة', en: 'When factoring is easy' }, { ar: 'عندما يكون b = 0', en: 'When b = 0' }, { ar: 'عندما يكون a = 1 و b زوجي', en: 'When a = 1 and b is even' } ], correct: 0, answer: { ar: 'القانون العام يُستخدم عندما تفشل الطرق الأخرى', en: 'Quadratic formula is used when other methods fail' } },
+                { q: { ar: 'ما أفضل طريقة لحل المعادلة: x² - 16 = 0؟', en: 'Best method to solve x² - 16 = 0?' }, options: [ { ar: 'خاصية الجذر التربيعي (b = 0)', en: 'Square root property (b = 0)' }, { ar: 'القانون العام', en: 'Quadratic formula' }, { ar: 'إكمال المربع', en: 'Completing the square' }, { ar: 'التحليل إلى عوامل', en: 'Factoring' } ], correct: 0, answer: { ar: 'b = 0، لذا خاصية الجذر التربيعي هي الأفضل', en: 'b = 0, so square root property is best' } },
+                { q: { ar: 'ما أفضل طريقة لحل المعادلة: x² + 6x + 9 = 0؟', en: 'Best method to solve x² + 6x + 9 = 0?' }, options: [ { ar: 'إكمال المربع (a=1, b=6 زوجي)', en: 'Completing the square (a=1, b=6 even)' }, { ar: 'القانون العام', en: 'Quadratic formula' }, { ar: 'خاصية الجذر التربيعي', en: 'Square root property' }, { ar: 'التحليل إلى عوامل', en: 'Factoring' } ], correct: 0, answer: { ar: 'a = 1 و b = 6 زوجي، لذا إكمال المربع', en: 'a = 1 and b = 6 even, so completing the square' } },
+                { q: { ar: 'ما أفضل طريقة لحل المعادلة: 2x² + 3x - 5 = 0؟', en: 'Best method to solve 2x² + 3x - 5 = 0?' }, options: [ { ar: 'القانون العام (معاملات معقدة)', en: 'Quadratic formula (complex coefficients)' }, { ar: 'التحليل إلى عوامل', en: 'Factoring' }, { ar: 'خاصية الجذر التربيعي', en: 'Square root property' }, { ar: 'إكمال المربع', en: 'Completing the square' } ], correct: 0, answer: { ar: 'المعاملات ليست بسيطة، لذا القانون العام', en: 'Coefficients are not simple, so quadratic formula' } },
+                { q: { ar: 'ما أفضل طريقة لحل المعادلة: x² - 5x + 6 = 0؟', en: 'Best method to solve x² - 5x + 6 = 0?' }, options: [ { ar: 'التحليل إلى عوامل (سهل التحليل)', en: 'Factoring (easy to factor)' }, { ar: 'القانون العام', en: 'Quadratic formula' }, { ar: 'خاصية الجذر التربيعي', en: 'Square root property' }, { ar: 'إكمال المربع', en: 'Completing the square' } ], correct: 0, answer: { ar: 'يمكن تحليلها بسهولة إلى (x-2)(x-3)', en: 'Can be easily factored as (x-2)(x-3)' } },
+                { q: { ar: 'ما أفضل طريقة لحل المعادلة: 3x² - 7 = 0؟', en: 'Best method to solve 3x² - 7 = 0?' }, options: [ { ar: 'خاصية الجذر التربيعي (b = 0)', en: 'Square root property (b = 0)' }, { ar: 'التحليل إلى عوامل', en: 'Factoring' }, { ar: 'إكمال المربع', en: 'Completing the square' }, { ar: 'القانون العام', en: 'Quadratic formula' } ], correct: 0, answer: { ar: 'b = 0، لذا خاصية الجذر التربيعي', en: 'b = 0, so square root property' } },
+                { q: { ar: 'ما أفضل طريقة لحل المعادلة: x² + 8x + 16 = 0؟', en: 'Best method to solve x² + 8x + 16 = 0?' }, options: [ { ar: 'إكمال المربع (a=1, b=8 زوجي)', en: 'Completing the square (a=1, b=8 even)' }, { ar: 'القانون العام', en: 'Quadratic formula' }, { ar: 'خاصية الجذر التربيعي', en: 'Square root property' }, { ar: 'التحليل إلى عوامل', en: 'Factoring' } ], correct: 0, answer: { ar: 'a = 1 و b = 8 زوجي، لذا إكمال المربع', en: 'a = 1 and b = 8 even, so completing the square' } }
+            ]
+        },
+        {
+            id: 'sec4',
+            title: { ar: '🔹 الجزء الرابع: التطبيقات الحياتية - حركة المقذوفات', en: '🔹 Part 4: Applications - Projectile Motion' },
+            questions: [
+                { q: { ar: 'ما الصيغة العامة لارتفاع المقذوف بالأقدام؟', en: 'What is the general formula for projectile height in feet?' }, options: [ { ar: 'h(t) = -16t² + v₀t + h₀', en: 'h(t) = -16t² + v₀t + h₀' }, { ar: 'h(t) = 16t² + v₀t + h₀', en: 'h(t) = 16t² + v₀t + h₀' }, { ar: 'h(t) = -16t² + v₀t', en: 'h(t) = -16t² + v₀t' }, { ar: 'h(t) = 16t² - v₀t', en: 'h(t) = 16t² - v₀t' } ], correct: 0, answer: { ar: 'الصيغة هي h(t) = -16t² + v₀t + h₀', en: 'The formula is h(t) = -16t² + v₀t + h₀' } },
+                { q: { ar: 'في صيغة h(t) = -16t² + v₀t + h₀، ماذا يمثل -16؟', en: 'In h(t) = -16t² + v₀t + h₀, what does -16 represent?' }, options: [ { ar: 'نصف تسارع الجاذبية بالأقدام/ثانية²', en: 'Half the acceleration due to gravity in ft/s²' }, { ar: 'السرعة الابتدائية', en: 'The initial velocity' }, { ar: 'الارتفاع الابتدائي', en: 'The initial height' }, { ar: 'الزمن', en: 'The time' } ], correct: 0, answer: { ar: '-16 يمثل نصف تسارع الجاذبية', en: '-16 represents half the acceleration due to gravity' } },
+                { q: { ar: 'في صيغة h(t) = -16t² + v₀t + h₀، ماذا يمثل v₀؟', en: 'In h(t) = -16t² + v₀t + h₀, what does v₀ represent?' }, options: [ { ar: 'السرعة الابتدائية', en: 'The initial velocity' }, { ar: 'تسارع الجاذبية', en: 'Acceleration due to gravity' }, { ar: 'الارتفاع الابتدائي', en: 'The initial height' }, { ar: 'الزمن', en: 'The time' } ], correct: 0, answer: { ar: 'v₀ يمثل السرعة الابتدائية', en: 'v₀ represents the initial velocity' } },
+                { q: { ar: 'في صيغة h(t) = -16t² + v₀t + h₀، ماذا يمثل h₀؟', en: 'In h(t) = -16t² + v₀t + h₀, what does h₀ represent?' }, options: [ { ar: 'الارتفاع الابتدائي', en: 'The initial height' }, { ar: 'السرعة الابتدائية', en: 'The initial velocity' }, { ar: 'تسارع الجاذبية', en: 'Acceleration due to gravity' }, { ar: 'الزمن', en: 'The time' } ], correct: 0, answer: { ar: 'h₀ يمثل الارتفاع الابتدائي', en: 'h₀ represents the initial height' } },
+                { q: { ar: 'كرة قُذفت لأعلى بسرعة ابتدائية 64 قدم/ث من ارتفاع 5 أقدام. متى تصل للأرض؟', en: 'A ball thrown up at 64 ft/s from 5 ft height. When does it hit the ground?' }, options: [ { ar: 'بعد حوالي 4.08 ثانية', en: 'After about 4.08 seconds' }, { ar: 'بعد 4 ثوانٍ', en: 'After 4 seconds' }, { ar: 'بعد 5 ثوانٍ', en: 'After 5 seconds' }, { ar: 'بعد 3 ثوانٍ', en: 'After 3 seconds' } ], correct: 0, answer: { ar: 'h(t) = -16t² + 64t + 5 = 0 → القانون العام يعطي t ≈ 4.08', en: 'h(t) = -16t² + 64t + 5 = 0 → quadratic formula gives t ≈ 4.08' } },
+                { q: { ar: 'حجر قُذف لأعلى بسرعة 80 قدم/ث من ارتفاع 0. متى يصل لأقصى ارتفاع؟', en: 'A stone thrown up at 80 ft/s from ground. When does it reach max height?' }, options: [ { ar: 'عند t = 2.5 ثانية', en: 'At t = 2.5 seconds' }, { ar: 'عند t = 5 ثوانٍ', en: 'At t = 5 seconds' }, { ar: 'عند t = 4 ثوانٍ', en: 'At t = 4 seconds' }, { ar: 'عند t = 3 ثوانٍ', en: 'At t = 3 seconds' } ], correct: 0, answer: { ar: 't = -v₀/2(-16) = -80/-32 = 2.5 ثانية', en: 't = -v₀/2(-16) = 2.5 seconds' } },
+                { q: { ar: 'في مسائل المقذوفات، متى h(t) = 0؟', en: 'In projectile problems, when does h(t) = 0?' }, options: [ { ar: 'عند وصول الجسم للأرض', en: 'When the object reaches the ground' }, { ar: 'عند أقصى ارتفاع', en: 'At maximum height' }, { ar: 'عند البداية', en: 'At the start' }, { ar: 'عند منتصف الرحلة', en: 'At mid-flight' } ], correct: 0, answer: { ar: 'h(t) = 0 يعني وصول الجسم للأرض', en: 'h(t) = 0 means the object reaches the ground' } },
+                { q: { ar: 'كرة قُذفت لأعلى بسرعة 48 قدم/ث من ارتفاع 10 أقدام. متى تصل للأرض؟', en: 'A ball thrown up at 48 ft/s from 10 ft. When does it hit the ground?' }, options: [ { ar: 'بعد حوالي 3.2 ثانية', en: 'After about 3.2 seconds' }, { ar: 'بعد 3 ثوانٍ', en: 'After 3 seconds' }, { ar: 'بعد 4 ثوانٍ', en: 'After 4 seconds' }, { ar: 'بعد 2 ثانية', en: 'After 2 seconds' } ], correct: 0, answer: { ar: 'h(t) = -16t² + 48t + 10 = 0 → t ≈ 3.2 ثانية', en: 'h(t) = -16t² + 48t + 10 = 0 → t ≈ 3.2 seconds' } },
+                { q: { ar: 'في مسائل الأرباح، ما الشكل العام لدالة الربح؟', en: 'In profit problems, what is the general form of profit function?' }, options: [ { ar: 'دالة تربيعية P(x) = ax² + bx + c', en: 'Quadratic function P(x) = ax² + bx + c' }, { ar: 'دالة خطية', en: 'Linear function' }, { ar: 'دالة أسية', en: 'Exponential function' }, { ar: 'دالة كسرية', en: 'Rational function' } ], correct: 0, answer: { ar: 'دالة الربح عادة تربيعية', en: 'Profit function is usually quadratic' } },
+                { q: { ar: 'كيف نجد أقصى ربح في المسائل الاقتصادية؟', en: 'How do we find maximum profit in economic problems?' }, options: [ { ar: 'باستخدام رأس القطع المكافئ (إحداثي x للرأس)', en: 'Using the vertex of the parabola (x-coordinate of vertex)' }, { ar: 'بالتحليل إلى عوامل', en: 'By factoring' }, { ar: 'بخاصية الجذر التربيعي', en: 'By square root property' }, { ar: 'لا يمكن إيجادها', en: 'Cannot be found' } ], correct: 0, answer: { ar: 'أقصى ربح عند رأس القطع المكافئ', en: 'Maximum profit is at the vertex of the parabola' } }
+            ]
+        },
+        {
+            id: 'sec5',
+            title: { ar: '🔹 الجزء الخامس: مسائل متقدمة ومختلطة', en: '🔹 Part 5: Advanced and Mixed Problems' },
+            questions: [
+                { q: { ar: 'حل المعادلة: x² - 4x + 4 = 0', en: 'Solve: x² - 4x + 4 = 0' }, options: [ { ar: 'x = 2 (جذر مكرر)', en: 'x = 2 (repeated root)' }, { ar: 'x = -2', en: 'x = -2' }, { ar: 'x = 4', en: 'x = 4' }, { ar: 'لا يوجد حل', en: 'No solution' } ], correct: 0, answer: { ar: 'المميز = 16-16 = 0 → x = 4/2 = 2', en: 'discriminant = 0 → x = 2' } },
+                { q: { ar: 'حل المعادلة: 2x² + 3x - 2 = 0', en: 'Solve: 2x² + 3x - 2 = 0' }, options: [ { ar: 'x = 1/2 أو x = -2', en: 'x = 1/2 or x = -2' }, { ar: 'x = -1/2 أو x = 2', en: 'x = -1/2 or x = 2' }, { ar: 'x = 2', en: 'x = 2' }, { ar: 'لا يوجد حل', en: 'No solution' } ], correct: 0, answer: { ar: 'المميز = 9+16 = 25 → x = (-3±5)/4 → x = 1/2 أو -2', en: 'discriminant = 25 → x = (-3±5)/4 → x = 1/2 or -2' } },
+                { q: { ar: 'حل المعادلة: x² + 2x + 2 = 0', en: 'Solve: x² + 2x + 2 = 0' }, options: [ { ar: 'لا توجد جذور حقيقية', en: 'No real roots' }, { ar: 'x = -1', en: 'x = -1' }, { ar: 'x = 1', en: 'x = 1' }, { ar: 'x = -2', en: 'x = -2' } ], correct: 0, answer: { ar: 'المميز = 4-8 = -4 < 0 → لا توجد جذور حقيقية', en: 'discriminant = -4 < 0 → no real roots' } },
+                { q: { ar: 'حل المعادلة: 3x² - 6x + 3 = 0', en: 'Solve: 3x² - 6x + 3 = 0' }, options: [ { ar: 'x = 1 (جذر مكرر)', en: 'x = 1 (repeated root)' }, { ar: 'x = -1', en: 'x = -1' }, { ar: 'x = 3', en: 'x = 3' }, { ar: 'لا يوجد حل', en: 'No solution' } ], correct: 0, answer: { ar: 'المميز = 36-36 = 0 → x = 6/6 = 1', en: 'discriminant = 0 → x = 1' } },
+                { q: { ar: 'حل المعادلة: x² - 7x + 12 = 0', en: 'Solve: x² - 7x + 12 = 0' }, options: [ { ar: 'x = 3 أو x = 4', en: 'x = 3 or x = 4' }, { ar: 'x = -3 أو x = -4', en: 'x = -3 or x = -4' }, { ar: 'x = 7', en: 'x = 7' }, { ar: 'x = 12', en: 'x = 12' } ], correct: 0, answer: { ar: 'المميز = 49-48 = 1 → x = (7±1)/2 → x = 4 أو 3', en: 'discriminant = 1 → x = (7±1)/2 → x = 4 or 3' } },
+                { q: { ar: 'حل المعادلة: 4x² - 4x + 1 = 0', en: 'Solve: 4x² - 4x + 1 = 0' }, options: [ { ar: 'x = 1/2 (جذر مكرر)', en: 'x = 1/2 (repeated root)' }, { ar: 'x = -1/2', en: 'x = -1/2' }, { ar: 'x = 1', en: 'x = 1' }, { ar: 'لا يوجد حل', en: 'No solution' } ], correct: 0, answer: { ar: 'المميز = 16-16 = 0 → x = 4/8 = 1/2', en: 'discriminant = 0 → x = 1/2' } },
+                { q: { ar: 'حل المعادلة: x² + 3x - 10 = 0', en: 'Solve: x² + 3x - 10 = 0' }, options: [ { ar: 'x = 2 أو x = -5', en: 'x = 2 or x = -5' }, { ar: 'x = -2 أو x = 5', en: 'x = -2 or x = 5' }, { ar: 'x = 5 أو x = -2', en: 'x = 5 or x = -2' }, { ar: 'x = 10', en: 'x = 10' } ], correct: 0, answer: { ar: 'المميز = 9+40 = 49 → x = (-3±7)/2 → x = 2 أو -5', en: 'discriminant = 49 → x = (-3±7)/2 → x = 2 or -5' } },
+                { q: { ar: 'حل المعادلة: 2x² - 5x + 3 = 0', en: 'Solve: 2x² - 5x + 3 = 0' }, options: [ { ar: 'x = 1 أو x = 3/2', en: 'x = 1 or x = 3/2' }, { ar: 'x = -1 أو x = -3/2', en: 'x = -1 or x = -3/2' }, { ar: 'x = 3', en: 'x = 3' }, { ar: 'لا يوجد حل', en: 'No solution' } ], correct: 0, answer: { ar: 'المميز = 25-24 = 1 → x = (5±1)/4 → x = 3/2 أو 1', en: 'discriminant = 1 → x = (5±1)/4 → x = 3/2 or 1' } },
+                { q: { ar: 'حل المعادلة: x² - 2x + 5 = 0', en: 'Solve: x² - 2x + 5 = 0' }, options: [ { ar: 'لا توجد جذور حقيقية', en: 'No real roots' }, { ar: 'x = 1', en: 'x = 1' }, { ar: 'x = -1', en: 'x = -1' }, { ar: 'x = 5', en: 'x = 5' } ], correct: 0, answer: { ar: 'المميز = 4-20 = -16 < 0 → لا توجد جذور حقيقية', en: 'discriminant = -16 < 0 → no real roots' } },
+                { q: { ar: 'حل المعادلة: 5x² + 2x - 1 = 0', en: 'Solve: 5x² + 2x - 1 = 0' }, options: [ { ar: 'x = (-1 ± √6) / 5', en: 'x = (-1 ± √6) / 5' }, { ar: 'x = 1', en: 'x = 1' }, { ar: 'x = -1', en: 'x = -1' }, { ar: 'لا يوجد حل', en: 'No solution' } ], correct: 0, answer: { ar: 'المميز = 4+20 = 24 → x = (-2±√24)/10 = (-1±√6)/5', en: 'discriminant = 24 → x = (-1±√6)/5' } }
+            ]
+        }
+    ]
+};
+
+function shuffleArray(array) { const arr = [...array]; for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; } return arr; }
+let examData, correctAnswersMap = {}, currentLang = 'ar', timeRemaining = 3600, timerInterval;
+
+function prepareShuffledExam() { examData = JSON.parse(JSON.stringify(originalExamData)); correctAnswersMap = {}; let globalIdx = 0; examData.sections.forEach((section) => { section.questions = shuffleArray(section.questions); section.questions.forEach((q) => { const optionsWithCorrect = q.options.map((opt, idx) => ({ option: opt, isCorrect: idx === q.correct })); const shuffledOptions = shuffleArray(optionsWithCorrect); q.options = shuffledOptions.map(o => o.option); q.correct = shuffledOptions.findIndex(o => o.isCorrect); correctAnswersMap[globalIdx] = String.fromCharCode(97 + q.correct); globalIdx++; }); }); }
+
+function reshuffleExam() { prepareShuffledExam(); renderExam(); document.querySelectorAll('input[type="radio"]:checked').forEach(r => r.checked = false); document.getElementById('results-panel').classList.add('hidden'); document.querySelectorAll('.correct, .incorrect').forEach(el => el.classList.remove('correct', 'incorrect')); alert(currentLang === 'ar' ? '🔀 تم إعادة خلط الأسئلة والخيارات بنجاح!' : '🔀 Questions and options have been reshuffled successfully!'); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+
+function setLanguage(lang) { currentLang = lang; document.documentElement.lang = lang; document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr'; document.getElementById('btn-ar').classList.toggle('active', lang === 'ar'); document.getElementById('btn-en').classList.toggle('active', lang === 'en'); document.body.classList.toggle('en-mode', lang === 'en'); document.querySelectorAll('[data-ar][data-en]').forEach(el => { el.textContent = el.getAttribute(`data-${lang}`); }); renderExam(); }
+
+function renderExam() { const container = document.getElementById('exam-content'); const labels = { ar: { option: ['أ', 'ب', 'ج', 'د'], answer: '✅ الإجابة:' }, en: { option: ['A', 'B', 'C', 'D'], answer: '✅ Answer:' } }; const lbl = labels[currentLang]; const isRTL = currentLang === 'ar'; let html = ''; let globalIdx = 0; examData.sections.forEach((section) => { html += `<section class="bg-white p-6 rounded-xl shadow-lg"><h2 class="text-xl font-bold mb-4 text-purple-700">${section.title[currentLang]}</h2><ol class="space-y-4 text-sm">`; section.questions.forEach((q) => { const borderSide = isRTL ? 'border-r-4 pr-4' : 'border-l-4 pl-4'; html += `<li class="${borderSide} border-purple-500 py-2" id="q-${globalIdx}"><strong>${globalIdx + 1}.</strong> ${q.q[currentLang]}<br>`; q.options.forEach((opt, oIdx) => { const radioSide = isRTL ? 'mr-4 ml-2' : 'ml-4 mr-2'; html += `<label class="cursor-pointer block mt-1 ${isRTL ? 'mr-4' : 'ml-4'}"><input type="radio" name="q${globalIdx}" value="${String.fromCharCode(97 + oIdx)}" class="${radioSide}">${lbl.option[oIdx]}) ${opt[currentLang]}</label>`; }); html += `<div class="answer-box text-green-700 mt-2 font-medium hidden">${lbl.answer} ${lbl.option[q.correct]}) ${q.options[q.correct][currentLang]} — ${q.answer[currentLang]}</div></li>`; globalIdx++; }); html += `</ol></section>`; }); container.innerHTML = html; }
+
+function startTimer() { timerInterval = setInterval(() => { timeRemaining--; const minutes = Math.floor(timeRemaining / 60); const seconds = timeRemaining % 60; const timerEl = document.getElementById('timer'); timerEl.textContent = `${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`; if (timeRemaining <= 300) timerEl.classList.add('timer-warning'); if (timeRemaining <= 0) { clearInterval(timerInterval); alert(currentLang === 'ar' ? "انتهى الوقت! سيتم تسليم الامتحان تلقائياً." : "Time's up! Exam will be submitted automatically."); gradeExam(); } }, 1000); }
+
+function toggleAnswers() { document.querySelectorAll('.answer-box').forEach(el => el.classList.toggle('hidden')); }
+
+function gradeExam() { clearInterval(timerInterval); let correctCount = 0; let secScores = [0, 0, 0, 0, 0]; for (let i = 0; i < 50; i++) { const selected = document.querySelector(`input[name="q${i}"]:checked`); const li = document.getElementById(`q-${i}`); if (li) { const isCorrect = selected && selected.value === correctAnswersMap[i]; if (isCorrect) { correctCount++; li.classList.add('correct'); li.classList.remove('incorrect'); secScores[Math.floor(i / 10)]++; } else { li.classList.add('incorrect'); li.classList.remove('correct'); } } } const score = correctCount; const successRate = Math.round((score / 50) * 100); document.getElementById('res-total').textContent = `${score} / 50`; document.getElementById('res-name').textContent = document.getElementById('studentName').value || (currentLang === 'ar' ? 'طالب' : 'Student'); document.getElementById('res-date').textContent = document.getElementById('examDate').value || new Date().toLocaleDateString(currentLang === 'ar' ? 'ar-AE' : 'en-US'); for (let i = 0; i < 5; i++) { document.getElementById(`sec${i + 1}-score`).textContent = `${secScores[i]}/10`; } const badge = document.getElementById('success-badge'); const percent = document.getElementById('success-percent'); percent.textContent = `${successRate}%`; if (currentLang === 'ar') { if (successRate >= 90) { badge.textContent = 'ممتاز'; badge.className = 'success-badge grade-excellent'; } else if (successRate >= 75) { badge.textContent = 'جيد جداً'; badge.className = 'success-badge grade-good'; } else if (successRate >= 50) { badge.textContent = 'جيد'; badge.className = 'success-badge grade-pass'; } else { badge.textContent = 'يحتاج تحسين'; badge.className = 'success-badge grade-fail'; } } else { if (successRate >= 90) { badge.textContent = 'Excellent'; badge.className = 'success-badge grade-excellent'; } else if (successRate >= 75) { badge.textContent = 'Very Good'; badge.className = 'success-badge grade-good'; } else if (successRate >= 50) { badge.textContent = 'Good'; badge.className = 'success-badge grade-pass'; } else { badge.textContent = 'Needs Improvement'; badge.className = 'success-badge grade-fail'; } } document.getElementById('results-panel').classList.remove('hidden'); document.getElementById('results-panel').scrollIntoView({ behavior: 'smooth' }); }
+
+function sendResultsToEmail() { const name = document.getElementById('studentName').value.trim(); if (!name) { alert(currentLang === 'ar' ? '⚠️ يرجى إدخال اسم الطالب أولاً.' : '⚠️ Please enter student name first.'); return; } const btn = document.getElementById('sendEmailBtn'); const status = document.getElementById('emailStatus'); btn.disabled = true; btn.textContent = currentLang === 'ar' ? '⏳ جاري الإرسال...' : '📤 Sending...'; const templateParams = { to_email: TARGET_EMAIL, student_name: name, student_class: document.getElementById('studentClass').value || 'N/A', exam_date: document.getElementById('examDate').value || new Date().toLocaleDateString(), total_score: document.getElementById('res-total').textContent, success_rate: document.getElementById('success-percent').textContent, grade: document.getElementById('success-badge').textContent, answers_table: '' }; emailjs.send(SERVICE_ID, TEMPLATE_ID, templateParams).then(() => { status.textContent = currentLang === 'ar' ? '✅ تم إرسال النتائج بنجاح!' : '✅ Results sent successfully!'; status.style.color = '#059669'; btn.textContent = currentLang === 'ar' ? '✓ تم الإرسال' : '✓ Sent'; }).catch(err => { status.textContent = currentLang === 'ar' ? '❌ فشل الإرسال' : '❌ Failed to send'; status.style.color = '#dc2626'; btn.disabled = false; btn.textContent = currentLang === 'ar' ? '📧 إعادة المحاولة' : '📧 Retry'; }); }
+
+window.addEventListener('DOMContentLoaded', () => { document.getElementById('examDate').valueAsDate = new Date(); prepareShuffledExam(); renderExam(); startTimer(); });
+</script>
+</body>
+</html>
